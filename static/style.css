@@ -1,0 +1,85 @@
+/* ── Global ─────────────────────────────────────────────────────────── */
+body {
+  background-color: #f8f9fa;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* ── Navbar ─────────────────────────────────────────────────────────── */
+.navbar {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .15);
+}
+
+/* ── Cards ──────────────────────────────────────────────────────────── */
+.card {
+  border: none;
+  border-radius: .75rem;
+}
+
+.card-header {
+  background-color: #fff;
+  border-bottom: 1px solid #e9ecef;
+  border-radius: .75rem .75rem 0 0 !important;
+  padding: .75rem 1.25rem;
+}
+
+/* ── Summary number ─────────────────────────────────────────────────── */
+.fs-2 {
+  font-size: 1.75rem !important;
+}
+
+/* ── Category badge ─────────────────────────────────────────────────── */
+.cat-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .35rem .75rem;
+  border-radius: 999px;
+  font-size: .85rem;
+  font-weight: 600;
+  background-color: #e9ecef;
+  color: #495057;
+}
+
+.cat-badge .count {
+  background-color: #fff;
+  color: #0d6efd;
+  border-radius: 999px;
+  padding: 0 .45rem;
+  font-size: .8rem;
+  font-weight: 700;
+}
+
+/* ── Table ──────────────────────────────────────────────────────────── */
+.table th {
+  font-size: .85rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: #6c757d;
+}
+
+/* ── Cycle badge ────────────────────────────────────────────────────── */
+.badge-monthly {
+  background-color: #d1e7dd;
+  color: #0f5132;
+}
+
+.badge-yearly {
+  background-color: #cfe2ff;
+  color: #084298;
+}
+
+/* ── Recent list ────────────────────────────────────────────────────── */
+#dashRecent .list-group-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: .75rem 1.25rem;
+}
+
+/* ── Responsive tweaks ──────────────────────────────────────────────── */
+@media (max-width: 576px) {
+  .table th:nth-child(3),
+  .table td:nth-child(3) {
+    display: none;
+  }
+}
