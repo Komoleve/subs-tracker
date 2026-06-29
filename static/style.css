@@ -76,6 +76,30 @@ body {
   padding: .75rem 1.25rem;
 }
 
+/* ── Category spending ──────────────────────────────────────────────── */
+.cat-spending-item {
+  padding: .75rem 1.25rem;
+}
+
+/* ── Annual ranking ─────────────────────────────────────────────────── */
+#dashRanking .list-group-item {
+  padding: .75rem 1.25rem;
+}
+
+#dashRanking .list-group-item::before {
+  font-weight: 700;
+  color: #6c757d;
+  min-width: 1.8rem;
+}
+
+/* ── Filter toolbar ─────────────────────────────────────────────────── */
+#filterBtns .filter-btn {
+  border-radius: 999px;
+  font-size: .8rem;
+  padding: .25rem .75rem;
+  transition: all .15s ease;
+}
+
 /* ── Responsive tweaks ──────────────────────────────────────────────── */
 @media (max-width: 576px) {
   .table th:nth-child(3),

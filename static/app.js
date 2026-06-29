@@ -9,6 +9,8 @@ const CYCLE_LABEL = { MONTHLY: '月額', YEARLY: '年額' };
 let allSubs = [];
 let deleteModal = null;
 let pendingDeleteId = null;
+let activeFilter = '';   // '' = すべて
+let activeSort   = 'created_desc';
 
 // ── Boot ─────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -20,6 +22,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // List view
   document.getElementById('btnAdd').addEventListener('click', openAddForm);
+
+  // Filter buttons
+  document.getElementById('filterBtns').addEventListener('click', e => {
+    const btn = e.target.closest('.filter-btn');
+    if (!btn) return;
+    document.querySelectorAll('.filter-btn').forEach(b => {
+      b.classList.remove('active', 'btn-primary');
+      b.classList.add('btn-outline-secondary');
+    });
+    btn.classList.add('active', 'btn-primary');
+    btn.classList.remove('btn-outline-secondary');
+    activeFilter = btn.dataset.cat;
+    renderList();
+  });
+
+  // Sort select
+  document.getElementById('sortSelect').addEventListener('change', e => {
+    activeSort = e.target.value;
+    renderList();
+  });
 
   // Form
   document.getElementById('subForm').addEventListener('submit', handleFormSubmit);
@@ -61,6 +83,15 @@ async function fetchAndRender(target) {
   }
 }
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function monthlyAmount(s) {
+  return s.billing_cycle === 'MONTHLY' ? s.price : Math.round(s.price / 12);
+}
+
+function yearlyAmount(s) {
+  return s.billing_cycle === 'MONTHLY' ? s.price * 12 : s.price;
+}
+
 // ── Dashboard ─────────────────────────────────────────────────────────────────
 function renderDashboard() {
   // Count
@@ -69,13 +100,8 @@ function renderDashboard() {
   // Monthly / Yearly totals
   let monthly = 0, yearly = 0;
   allSubs.forEach(s => {
-    if (s.billing_cycle === 'MONTHLY') {
-      monthly += s.price;
-      yearly  += s.price * 12;
-    } else {
-      monthly += Math.round(s.price / 12);
-      yearly  += s.price;
-    }
+    monthly += monthlyAmount(s);
+    yearly  += yearlyAmount(s);
   });
   document.getElementById('dashMonthly').textContent = monthly.toLocaleString();
   document.getElementById('dashYearly').textContent  = yearly.toLocaleString();
@@ -114,16 +140,81 @@ function renderDashboard() {
       </li>
     `).join('');
   }
+
+  // ── Category spending ──────────────────────────────────────────────────────
+  const catSpendMap = {};
+  allSubs.forEach(s => {
+    if (!catSpendMap[s.category]) catSpendMap[s.category] = { monthly: 0, yearly: 0 };
+    catSpendMap[s.category].monthly += monthlyAmount(s);
+    catSpendMap[s.category].yearly  += yearlyAmount(s);
+  });
+
+  const catSpendEl = document.getElementById('dashCatSpending');
+  if (Object.keys(catSpendMap).length === 0) {
+    catSpendEl.innerHTML = '<li class="list-group-item text-muted">データなし</li>';
+  } else {
+    // Sort by monthly desc
+    const sorted = Object.entries(catSpendMap).sort((a, b) => b[1].monthly - a[1].monthly);
+    catSpendEl.innerHTML = sorted.map(([cat, val]) => `
+      <li class="list-group-item cat-spending-item">
+        <div class="fw-semibold">${escHtml(cat)}</div>
+        <div class="d-flex gap-3 mt-1">
+          <span class="text-muted small">月額換算: <span class="fw-bold text-dark">${val.monthly.toLocaleString()}円</span></span>
+          <span class="text-muted small">年額換算: <span class="fw-bold text-dark">${val.yearly.toLocaleString()}円</span></span>
+        </div>
+      </li>
+    `).join('');
+  }
+
+  // ── Annual cost ranking (top 5) ────────────────────────────────────────────
+  const rankingEl = document.getElementById('dashRanking');
+  if (allSubs.length === 0) {
+    rankingEl.innerHTML = '<li class="list-group-item text-muted">データなし</li>';
+  } else {
+    const ranked = [...allSubs]
+      .sort((a, b) => yearlyAmount(b) - yearlyAmount(a))
+      .slice(0, 5);
+    rankingEl.innerHTML = ranked.map(s => `
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <span class="fw-semibold">${escHtml(s.name)}</span>
+        <span class="fw-bold text-primary">${yearlyAmount(s).toLocaleString()}円/年</span>
+      </li>
+    `).join('');
+  }
 }
 
 // ── List ──────────────────────────────────────────────────────────────────────
 function renderList() {
+  // Filter
+  let subs = activeFilter
+    ? allSubs.filter(s => s.category === activeFilter)
+    : [...allSubs];
+
+  // Sort
+  switch (activeSort) {
+    case 'created_desc':
+      subs.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      break;
+    case 'created_asc':
+      subs.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+      break;
+    case 'price_monthly_desc':
+      subs.sort((a, b) => monthlyAmount(b) - monthlyAmount(a));
+      break;
+    case 'price_monthly_asc':
+      subs.sort((a, b) => monthlyAmount(a) - monthlyAmount(b));
+      break;
+    case 'name_asc':
+      subs.sort((a, b) => a.name.localeCompare(b.name, 'ja'));
+      break;
+  }
+
   const tbody = document.getElementById('subsList');
-  if (allSubs.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">登録されているサブスクリプションはありません。</td></tr>';
+  if (subs.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">該当するサブスクリプションはありません。</td></tr>';
     return;
   }
-  tbody.innerHTML = allSubs.map(s => `
+  tbody.innerHTML = subs.map(s => `
     <tr>
       <td class="fw-semibold">${escHtml(s.name)}</td>
       <td><span class="badge rounded-pill bg-secondary">${escHtml(s.category)}</span></td>

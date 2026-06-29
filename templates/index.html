@@ -73,19 +73,69 @@
     </div>
 
     <!-- Recent subscriptions -->
-    <div class="card shadow-sm">
+    <div class="card shadow-sm mb-4">
       <div class="card-header fw-semibold">最近追加したサブスクリプション</div>
       <ul class="list-group list-group-flush" id="dashRecent"></ul>
+    </div>
+
+    <!-- Category spending -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-header fw-semibold">カテゴリ別支出</div>
+      <div class="card-body p-0">
+        <ul class="list-group list-group-flush" id="dashCatSpending"></ul>
+      </div>
+    </div>
+
+    <!-- Annual cost ranking -->
+    <div class="card shadow-sm">
+      <div class="card-header fw-semibold">年間コストランキング <span class="text-muted fw-normal small">（上位5件）</span></div>
+      <div class="card-body p-0">
+        <ol class="list-group list-group-flush list-group-numbered" id="dashRanking"></ol>
+      </div>
     </div>
   </section>
 
   <!-- ── List ───────────────────────────────────────────────────────── -->
   <section id="viewList" class="d-none">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
       <h2 class="fw-bold mb-0">サブスクリプション一覧</h2>
       <button class="btn btn-primary" id="btnAdd">
         <i class="bi bi-plus-lg me-1"></i>新規登録
       </button>
+    </div>
+
+    <!-- Filter & Sort toolbar -->
+    <div class="card shadow-sm mb-3">
+      <div class="card-body py-2">
+        <div class="row g-2 align-items-center">
+          <div class="col-12 col-md-7">
+            <div class="d-flex flex-wrap gap-1" id="filterBtns">
+              <button class="btn btn-sm btn-primary filter-btn active" data-cat="">すべて</button>
+              <button class="btn btn-sm btn-outline-secondary filter-btn" data-cat="動画">動画</button>
+              <button class="btn btn-sm btn-outline-secondary filter-btn" data-cat="音楽">音楽</button>
+              <button class="btn btn-sm btn-outline-secondary filter-btn" data-cat="AI">AI</button>
+              <button class="btn btn-sm btn-outline-secondary filter-btn" data-cat="ゲーム">ゲーム</button>
+              <button class="btn btn-sm btn-outline-secondary filter-btn" data-cat="仕事">仕事</button>
+              <button class="btn btn-sm btn-outline-secondary filter-btn" data-cat="クラウド">クラウド</button>
+              <button class="btn btn-sm btn-outline-secondary filter-btn" data-cat="その他">その他</button>
+            </div>
+          </div>
+          <div class="col-12 col-md-5">
+            <div class="d-flex align-items-center gap-2">
+              <label for="sortSelect" class="text-muted small text-nowrap mb-0">
+                <i class="bi bi-sort-down me-1"></i>並び順
+              </label>
+              <select class="form-select form-select-sm" id="sortSelect">
+                <option value="created_desc">作成日（新しい順）</option>
+                <option value="created_asc">作成日（古い順）</option>
+                <option value="price_monthly_desc">料金（月額換算・高い順）</option>
+                <option value="price_monthly_asc">料金（月額換算・安い順）</option>
+                <option value="name_asc">サービス名（昇順）</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="card shadow-sm">
