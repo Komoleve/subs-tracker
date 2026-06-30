@@ -51,10 +51,11 @@ body {
 
 /* ── Table ──────────────────────────────────────────────────────────── */
 .table th {
-  font-size: .85rem;
+  font-size: .8rem;
   text-transform: uppercase;
   letter-spacing: .04em;
   color: #6c757d;
+  white-space: nowrap;
 }
 
 /* ── Cycle badge ────────────────────────────────────────────────────── */
@@ -66,6 +67,22 @@ body {
 .badge-yearly {
   background-color: #cfe2ff;
   color: #084298;
+}
+
+/* ── Status badge ───────────────────────────────────────────────────── */
+.badge-active {
+  background-color: #d1e7dd;
+  color: #0f5132;
+}
+
+.badge-paused {
+  background-color: #fff3cd;
+  color: #664d03;
+}
+
+.badge-canceled {
+  background-color: #f8d7da;
+  color: #842029;
 }
 
 /* ── Recent list ────────────────────────────────────────────────────── */
@@ -92,6 +109,12 @@ body {
   min-width: 1.8rem;
 }
 
+/* ── Payment / Renewal schedule ─────────────────────────────────────── */
+#dashPayments .list-group-item,
+#dashRenewals .list-group-item {
+  padding: .65rem 1.25rem;
+}
+
 /* ── Filter toolbar ─────────────────────────────────────────────────── */
 #filterBtns .filter-btn {
   border-radius: 999px;
@@ -101,9 +124,21 @@ body {
 }
 
 /* ── Responsive tweaks ──────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Hide less critical columns on tablet/mobile */
+  .table th:nth-child(6),
+  .table td:nth-child(6),
+  .table th:nth-child(7),
+  .table td:nth-child(7) {
+    display: none;
+  }
+}
+
 @media (max-width: 576px) {
   .table th:nth-child(3),
-  .table td:nth-child(3) {
+  .table td:nth-child(3),
+  .table th:nth-child(5),
+  .table td:nth-child(5) {
     display: none;
   }
 }

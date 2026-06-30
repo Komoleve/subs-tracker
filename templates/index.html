@@ -87,11 +87,23 @@
     </div>
 
     <!-- Annual cost ranking -->
-    <div class="card shadow-sm">
+    <div class="card shadow-sm mb-4">
       <div class="card-header fw-semibold">年間コストランキング <span class="text-muted fw-normal small">（上位5件）</span></div>
       <div class="card-body p-0">
         <ol class="list-group list-group-flush list-group-numbered" id="dashRanking"></ol>
       </div>
+    </div>
+
+    <!-- Payment schedule -->
+    <div class="card shadow-sm mb-4">
+      <div class="card-header fw-semibold">今後の支払予定</div>
+      <ul class="list-group list-group-flush" id="dashPayments"></ul>
+    </div>
+
+    <!-- Renewal schedule -->
+    <div class="card shadow-sm">
+      <div class="card-header fw-semibold">更新予定</div>
+      <ul class="list-group list-group-flush" id="dashRenewals"></ul>
     </div>
   </section>
 
@@ -99,10 +111,22 @@
   <section id="viewList" class="d-none">
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h2 class="fw-bold mb-0">サブスクリプション一覧</h2>
-      <button class="btn btn-primary" id="btnAdd">
-        <i class="bi bi-plus-lg me-1"></i>新規登録
-      </button>
+      <div class="d-flex gap-2">
+        <button class="btn btn-outline-secondary btn-sm" id="btnExport">
+          <i class="bi bi-download me-1"></i>CSVエクスポート
+        </button>
+        <label class="btn btn-outline-secondary btn-sm mb-0" for="importFile">
+          <i class="bi bi-upload me-1"></i>CSVインポート
+        </label>
+        <input type="file" id="importFile" accept=".csv" class="d-none" />
+        <button class="btn btn-primary btn-sm" id="btnAdd">
+          <i class="bi bi-plus-lg me-1"></i>新規登録
+        </button>
+      </div>
     </div>
+
+    <!-- Import result alert -->
+    <div id="importAlert" class="alert d-none mb-3"></div>
 
     <!-- Filter & Sort toolbar -->
     <div class="card shadow-sm mb-3">
@@ -147,6 +171,10 @@
               <th>カテゴリ</th>
               <th class="text-end">料金</th>
               <th>請求周期</th>
+              <th class="text-center">支払日</th>
+              <th>契約開始日</th>
+              <th>更新日</th>
+              <th>ステータス</th>
               <th class="text-center">操作</th>
             </tr>
           </thead>
@@ -167,48 +195,86 @@
         <form id="subForm" novalidate>
           <input type="hidden" id="formId" />
 
-          <div class="mb-3">
-            <label for="fieldName" class="form-label fw-semibold">サービス名 <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" id="fieldName" placeholder="例: Netflix" required />
-          </div>
+          <div class="row g-3">
+            <!-- Service name -->
+            <div class="col-12 col-md-6">
+              <label for="fieldName" class="form-label fw-semibold">サービス名 <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="fieldName" placeholder="例: Netflix" required />
+            </div>
 
-          <div class="mb-3">
-            <label for="fieldPrice" class="form-label fw-semibold">料金 <span class="text-danger">*</span></label>
-            <div class="input-group">
-              <input type="number" class="form-control" id="fieldPrice" placeholder="例: 1490" min="1" required />
-              <span class="input-group-text">円</span>
+            <!-- Category -->
+            <div class="col-12 col-md-6">
+              <label for="fieldCategory" class="form-label fw-semibold">カテゴリ <span class="text-danger">*</span></label>
+              <select class="form-select" id="fieldCategory" required>
+                <option value="">選択してください</option>
+                <option>動画</option>
+                <option>音楽</option>
+                <option>AI</option>
+                <option>ゲーム</option>
+                <option>仕事</option>
+                <option>クラウド</option>
+                <option>その他</option>
+              </select>
+            </div>
+
+            <!-- Price -->
+            <div class="col-12 col-md-4">
+              <label for="fieldPrice" class="form-label fw-semibold">料金 <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <input type="number" class="form-control" id="fieldPrice" placeholder="例: 1490" min="1" required />
+                <span class="input-group-text">円</span>
+              </div>
+            </div>
+
+            <!-- Billing cycle -->
+            <div class="col-12 col-md-4">
+              <label class="form-label fw-semibold">請求周期 <span class="text-danger">*</span></label>
+              <div class="d-flex gap-3 mt-1">
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="billing_cycle" id="cycleMonthly" value="MONTHLY" checked />
+                  <label class="form-check-label" for="cycleMonthly">月額</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="billing_cycle" id="cycleYearly" value="YEARLY" />
+                  <label class="form-check-label" for="cycleYearly">年額</label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Payment day -->
+            <div class="col-12 col-md-4">
+              <label for="fieldPaymentDay" class="form-label fw-semibold">支払日</label>
+              <div class="input-group">
+                <input type="number" class="form-control" id="fieldPaymentDay" placeholder="例: 15" min="1" max="31" />
+                <span class="input-group-text">日</span>
+              </div>
+              <div class="form-text">月額契約の場合は入力推奨（1〜31）</div>
+            </div>
+
+            <!-- Status -->
+            <div class="col-12 col-md-4">
+              <label for="fieldStatus" class="form-label fw-semibold">ステータス <span class="text-danger">*</span></label>
+              <select class="form-select" id="fieldStatus" required>
+                <option value="ACTIVE">利用中</option>
+                <option value="PAUSED">停止中</option>
+                <option value="CANCELED">解約済み</option>
+              </select>
+            </div>
+
+            <!-- Start date -->
+            <div class="col-12 col-md-4">
+              <label for="fieldStartDate" class="form-label fw-semibold">契約開始日</label>
+              <input type="date" class="form-control" id="fieldStartDate" />
+            </div>
+
+            <!-- Renewal date -->
+            <div class="col-12 col-md-4">
+              <label for="fieldRenewalDate" class="form-label fw-semibold">更新日</label>
+              <input type="date" class="form-control" id="fieldRenewalDate" />
             </div>
           </div>
 
-          <div class="mb-3">
-            <label class="form-label fw-semibold">請求周期 <span class="text-danger">*</span></label>
-            <div class="d-flex gap-3">
-              <div class="form-check">
-                <input class="form-check-input" type="radio" name="billing_cycle" id="cycleMonthly" value="MONTHLY" checked />
-                <label class="form-check-label" for="cycleMonthly">月額</label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="radio" name="billing_cycle" id="cycleYearly" value="YEARLY" />
-                <label class="form-check-label" for="cycleYearly">年額</label>
-              </div>
-            </div>
-          </div>
-
-          <div class="mb-4">
-            <label for="fieldCategory" class="form-label fw-semibold">カテゴリ <span class="text-danger">*</span></label>
-            <select class="form-select" id="fieldCategory" required>
-              <option value="">選択してください</option>
-              <option>動画</option>
-              <option>音楽</option>
-              <option>AI</option>
-              <option>ゲーム</option>
-              <option>仕事</option>
-              <option>クラウド</option>
-              <option>その他</option>
-            </select>
-          </div>
-
-          <div class="d-flex gap-2">
+          <div class="d-flex gap-2 mt-4">
             <button type="submit" class="btn btn-primary">
               <i class="bi bi-floppy me-1"></i>保存
             </button>
